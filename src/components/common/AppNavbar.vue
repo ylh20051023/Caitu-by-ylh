@@ -7,7 +7,13 @@
       </router-link>
 
       <!-- 桌面导航 -->
-      <n-menu mode="horizontal" :value="activeKey" :options="menuOptions" class="hidden md:flex" @update:value="handleMenuClick" />
+      <div class="hidden md:flex items-center gap-1">
+        <n-menu mode="horizontal" :value="activeKey" :options="menuOptions" @update:value="handleMenuClick" />
+        <!-- 登录后的额外菜单 -->
+        <template v-if="authStore.user">
+          <n-menu mode="horizontal" :value="activeKey" :options="authMenuOptions" @update:value="handleMenuClick" />
+        </template>
+      </div>
 
       <div class="flex items-center gap-3">
         <template v-if="authStore.user">
@@ -30,9 +36,10 @@
     </div>
 
     <!-- 移动端菜单 -->
-    <n-drawer v-model:show="showMobileMenu" placement="top" :height="280">
+    <n-drawer v-model:show="showMobileMenu" placement="top" :height="350">
       <n-drawer-content>
         <n-menu :value="activeKey" :options="menuOptions" @update:value="handleMobileMenuClick" />
+        <n-menu v-if="authStore.user" :value="activeKey" :options="authMenuOptions" @update:value="handleMobileMenuClick" />
       </n-drawer-content>
     </n-drawer>
   </n-layout-header>
@@ -60,6 +67,8 @@ const activeKey = computed(() => {
   if (path.startsWith('/certificates')) return 'certificates'
   if (path.startsWith('/news')) return 'news'
   if (path.startsWith('/resume')) return 'resume'
+  if (path.startsWith('/post-job')) return 'post-job'
+  if (path.startsWith('/admin')) return 'admin'
   return ''
 })
 
@@ -70,6 +79,17 @@ const menuOptions: MenuOption[] = [
   { label: '行业资讯', key: 'news' },
   { label: '简历诊断', key: 'resume' },
 ]
+
+// 动态菜单：登录后显示的额外选项
+const authMenuOptions = computed<MenuOption[]>(() => {
+  const options: MenuOption[] = [
+    { label: '✍️ 发布实习', key: 'post-job' },
+  ]
+  if (authStore.isAdmin) {
+    options.push({ label: '⚙️ 后台管理', key: 'admin' })
+  }
+  return options
+})
 
 const userOptions: DropdownOption[] = [
   { label: '发布实习', key: 'post-job' },
